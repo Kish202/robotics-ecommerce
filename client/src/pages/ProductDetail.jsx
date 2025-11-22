@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import  ImageGallery from '../components/product-detail/ImageGallery';
-import ProductInfo from '../components/product-detail/ProductInfo';
-import ProductSpecs from '../components/product-detail/ProductSpecs';
+import ProductInfo from '../components/product-detail/Productinfo';
+import ProductSpecs from '../components/product-detail/Productspecs';
 import VideoDemo from      '../components/product-detail/VideoDemo';
 import Reviews from '../components/product-detail/Reviews';
 import RelatedProducts from '../components/product-detail/RelatedProducts';  
