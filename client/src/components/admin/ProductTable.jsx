@@ -72,7 +72,8 @@ const ProductTable = ({ products = [], onEdit, onDelete, onView }) => {
   // Filter products
   const filteredProducts = displayProducts.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
+    const categoryName = typeof product.category === 'object' ? product.category?.name : product.category;
+    const matchesCategory = filterCategory === 'all' || categoryName === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -82,7 +83,9 @@ const ProductTable = ({ products = [], onEdit, onDelete, onView }) => {
   const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
 
   // Get unique categories
-  const categories = ['all', ...new Set(displayProducts.map((p) => p.category))];
+  const categories = ['all', ...new Set(displayProducts.map((p) =>
+    typeof p.category === 'object' ? p.category?.name : p.category
+  ).filter(Boolean))];
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -214,7 +217,7 @@ const ProductTable = ({ products = [], onEdit, onDelete, onView }) => {
             {paginatedProducts.length > 0 ? (
               paginatedProducts.map((product) => (
                 <tr
-                  key={product.id}
+                  key={product._id || product.id}
                   className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
                   <td className="py-3 px-4">
@@ -241,7 +244,7 @@ const ProductTable = ({ products = [], onEdit, onDelete, onView }) => {
                     </div>
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
-                    {product.category}
+                    {typeof product.category === 'object' ? product.category?.name : product.category}
                   </td>
                   <td className="py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">
                     ${product.price.toFixed(2)}

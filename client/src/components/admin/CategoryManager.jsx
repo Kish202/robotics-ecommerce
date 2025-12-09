@@ -1,19 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X, FolderTree } from 'lucide-react';
 import Card from '../common/Card';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Modal from '../common/Modal';
+import Spinner from '../common/Spinner';
+import api from '../../services/api';
 
 const CategoryManager = () => {
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'Robot Cleaners', description: 'Automated cleaning robots', productCount: 12, icon: '🧹' },
-    { id: 2, name: 'Kitchen Robots', description: 'Smart cooking assistants', productCount: 8, icon: '👨‍🍳' },
-    { id: 3, name: 'Lawn Care', description: 'Automated lawn maintenance', productCount: 6, icon: '🌱' },
-    { id: 4, name: 'Service Robots', description: 'Food and beverage service', productCount: 10, icon: '🍽️' },
-    { id: 5, name: 'Smart Home', description: 'Home automation devices', productCount: 9, icon: '🏠' },
-  ]);
-
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({
@@ -22,6 +19,27 @@ const CategoryManager = () => {
     icon: '📦',
   });
   const [errors, setErrors] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.categories.getAll();
+      if (response.success) {
+        setCategories(response.data);
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      setError(err.message || 'Failed to load categories');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleOpenModal = (category = null) => {
     if (category) {
@@ -58,39 +76,75 @@ const CategoryManager = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
-      if (editingCategory) {
-        // Update existing category
-        setCategories(
-          categories.map((cat) =>
-            cat.id === editingCategory.id
-              ? { ...cat, ...formData }
-              : cat
-          )
-        );
-      } else {
-        // Add new category
-        const newCategory = {
-          id: categories.length + 1,
-          ...formData,
-          productCount: 0,
-        };
-        setCategories([...categories, newCategory]);
+      setIsSaving(true);
+      try {
+        if (editingCategory) {
+          // Update existing category
+          const response = await api.categories.update(editingCategory._id, formData);
+          if (response.success) {
+            setCategories(
+              categories.map((cat) =>
+                cat._id === editingCategory._id ? response.data : cat
+              )
+            );
+          }
+        } else {
+          // Add new category
+          const response = await api.categories.create(formData);
+          if (response.success) {
+            setCategories([...categories, response.data]);
+          }
+        }
+        handleCloseModal();
+      } catch (err) {
+        console.error('Error saving category:', err);
+        setErrors({ submit: err.message || 'Failed to save category' });
+      } finally {
+        setIsSaving(false);
       }
-      handleCloseModal();
     }
   };
 
-  const handleDelete = (categoryId) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      setCategories(categories.filter((cat) => cat.id !== categoryId));
+  const handleDelete = async (category) => {
+    if (window.confirm(`Are you sure you want to delete "${category.name}"?`)) {
+      try {
+        const response = await api.categories.delete(category._id);
+        if (response.success) {
+          setCategories(categories.filter((cat) => cat._id !== category._id));
+        }
+      } catch (err) {
+        console.error('Error deleting category:', err);
+        alert(err.message || 'Failed to delete category');
+      }
     }
   };
 
   const iconOptions = ['🧹', '👨‍🍳', '🌱', '🍽️', '🏠', '🤖', '⚙️', '📱', '🔧', '✨'];
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <div className="text-center py-12">
+          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+          <Button variant="outline" onClick={fetchCategories}>
+            Try Again
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -114,53 +168,53 @@ const CategoryManager = () => {
       </div>
 
       {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories.map((category) => (
-          <Card key={category.id} hover={true} className="group">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-4xl">{category.icon}</span>
-              </div>
-              
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => handleOpenModal(category)}
-                  className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(category.id)}
-                  className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+      {categories.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.map((category) => (
+            <Card key={category._id} hover={true} className="group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="text-4xl">{category.icon}</span>
+                </div>
 
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-              {category.name}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {category.description}
-            </p>
-
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Products
-                </span>
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {category.productCount}
-                </span>
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleOpenModal(category)}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(category)}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
-      </div>
 
-      {/* Empty State */}
-      {categories.length === 0 && (
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                {category.name}
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                {category.description}
+              </p>
+
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Products
+                  </span>
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    {category.productCount || 0}
+                  </span>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        /* Empty State */
         <Card>
           <div className="text-center py-12">
             <FolderTree className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -189,6 +243,12 @@ const CategoryManager = () => {
         size="md"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {errors.submit && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-red-600 dark:text-red-400 text-sm">{errors.submit}</p>
+            </div>
+          )}
+
           <Input
             label="Category Name"
             name="name"
@@ -230,10 +290,9 @@ const CategoryManager = () => {
                   className={`
                     aspect-square rounded-lg flex items-center justify-center text-3xl
                     transition-all hover:scale-110
-                    ${
-                      formData.icon === icon
-                        ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500'
-                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ${formData.icon === icon
+                      ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500'
+                      : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                     }
                   `}
                 >
@@ -249,6 +308,7 @@ const CategoryManager = () => {
               variant="outline"
               icon={<X className="w-5 h-5" />}
               onClick={handleCloseModal}
+              disabled={isSaving}
             >
               Cancel
             </Button>
@@ -256,6 +316,7 @@ const CategoryManager = () => {
               type="submit"
               variant="primary"
               icon={<Save className="w-5 h-5" />}
+              loading={isSaving}
             >
               {editingCategory ? 'Update' : 'Create'}
             </Button>
@@ -282,7 +343,7 @@ const CategoryManager = () => {
               Total Products
             </p>
             <p className="text-3xl font-bold text-gray-900 dark:text-white">
-              {categories.reduce((sum, cat) => sum + cat.productCount, 0)}
+              {categories.reduce((sum, cat) => sum + (cat.productCount || 0), 0)}
             </p>
           </div>
           <div>
@@ -292,9 +353,9 @@ const CategoryManager = () => {
             <p className="text-3xl font-bold text-gray-900 dark:text-white">
               {categories.length > 0
                 ? Math.round(
-                    categories.reduce((sum, cat) => sum + cat.productCount, 0) /
-                      categories.length
-                  )
+                  categories.reduce((sum, cat) => sum + (cat.productCount || 0), 0) /
+                  categories.length
+                )
                 : 0}
             </p>
           </div>

@@ -6,14 +6,17 @@ import Badge from '../common/Badge';
 import Rating from '../common/Rating';
 import Button from '../common/Button';
 
-const ProductCard = ({ product, layout = 'grid' }) => {
+import { useCart } from '../../contexts/ShoppingContext';
+
+const ProductCard = ({ product, layout = 'grid', onQuickView }) => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [isFavorite, setIsFavorite] = React.useState(false);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    // Add to cart logic
-    console.log('Added to cart:', product.id);
+    addToCart(product);
+    // Optional: Show toast notification
   };
 
   const handleToggleFavorite = (e) => {
@@ -23,8 +26,9 @@ const ProductCard = ({ product, layout = 'grid' }) => {
 
   const handleQuickView = (e) => {
     e.stopPropagation();
-    // Quick view logic
-    console.log('Quick view:', product.id);
+    if (onQuickView) {
+      onQuickView(product);
+    }
   };
 
   if (layout === 'list') {
@@ -32,15 +36,23 @@ const ProductCard = ({ product, layout = 'grid' }) => {
       <Card
         hover={true}
         className="group cursor-pointer"
-        onClick={() => navigate(`/products/${product.id}`)}
+        onClick={() => navigate(`/products/${product._id || product.id}`)}
       >
         <div className="flex flex-col md:flex-row gap-6">
           {/* Product Image */}
           <div className="relative w-full md:w-48 h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
-            <div className="text-6xl transform group-hover:scale-110 transition-transform duration-500">
-              {product.image || '🤖'}
-            </div>
-            
+            {product.thumbnail || (product.images && product.images.length > 0) || (product.image && (product.image.startsWith('http') || product.image.startsWith('/'))) ? (
+              <img
+                src={product.thumbnail || product.images?.[0]?.url || product.image}
+                alt={product.name}
+                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+              />
+            ) : (
+              <div className="text-6xl transform group-hover:scale-110 transition-transform duration-500">
+                {product.image || '🤖'}
+              </div>
+            )}
+
             {/* Badges */}
             {product.badge && (
               <div className="absolute top-2 left-2">
@@ -63,20 +75,19 @@ const ProductCard = ({ product, layout = 'grid' }) => {
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    {product.category}
+                    {product.category?.name || product.category}
                   </p>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
                     {product.name}
                   </h3>
                 </div>
-                
+
                 <button
                   onClick={handleToggleFavorite}
-                  className={`p-2 rounded-full transition-all ${
-                    isFavorite
-                      ? 'bg-red-100 text-red-600 dark:bg-red-900/30'
-                      : 'bg-gray-100 text-gray-400 dark:bg-gray-800 hover:text-red-600'
-                  }`}
+                  className={`p-2 rounded-full transition-all ${isFavorite
+                    ? 'bg-red-100 text-red-600 dark:bg-red-900/30'
+                    : 'bg-gray-100 text-gray-400 dark:bg-gray-800 hover:text-red-600'
+                    }`}
                 >
                   <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
                 </button>
@@ -152,10 +163,10 @@ const ProductCard = ({ product, layout = 'grid' }) => {
     <Card
       hover={true}
       className="group cursor-pointer relative overflow-hidden"
-      onClick={() => navigate(`/products/${product.id}`)}
+      onClick={() => navigate(`/products/${product._id || product.id}`)}
     >
       {/* Badges */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+      <div className="absolute top-4 left-4 z-30 flex flex-col gap-2">
         {product.badge && (
           <Badge variant={product.badgeVariant || 'primary'}>
             {product.badge}
@@ -169,38 +180,47 @@ const ProductCard = ({ product, layout = 'grid' }) => {
       {/* Favorite Button */}
       <button
         onClick={handleToggleFavorite}
-        className={`absolute top-4 right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-          isFavorite
-            ? 'bg-red-100 text-red-600 dark:bg-red-900/30 scale-110'
-            : 'bg-white/80 text-gray-400 dark:bg-gray-800/80 hover:text-red-600 hover:scale-110'
-        }`}
+        className={`absolute top-4 right-4 z-30 w-10 h-10 rounded-full flex items-center justify-center transition-all ${isFavorite
+          ? 'bg-red-100 text-red-600 dark:bg-red-900/30 scale-110'
+          : 'bg-white/80 text-gray-400 dark:bg-gray-800/80 hover:text-red-600 hover:scale-110'
+          }`}
       >
         <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
       </button>
 
       {/* Product Image */}
       <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
-        <div className="text-8xl transform group-hover:scale-110 transition-transform duration-500">
-          {product.image || '🤖'}
-        </div>
-        
+        {product.thumbnail || (product.images && product.images.length > 0) || (product.image && (product.image.startsWith('http') || product.image.startsWith('/'))) ? (
+          <img
+            src={product.thumbnail || product.images?.[0]?.url || product.image}
+            alt={product.name}
+            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+          />
+        ) : (
+          <div className="text-8xl transform group-hover:scale-110 transition-transform duration-500">
+            {product.image || '🤖'}
+          </div>
+        )}
+
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-4 gap-2">
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4 z-20">
           <Button
             variant="secondary"
             size="sm"
-            icon={<Eye className="w-4 h-4" />}
+            className="rounded-full w-11 h-11 p-0 flex items-center justify-center hover:scale-110 transition-transform"
             onClick={handleQuickView}
+            title="Quick View"
           >
-            Quick View
+            <Eye className="w-5 h-5" />
           </Button>
           <Button
             variant="primary"
             size="sm"
-            icon={<ShoppingCart className="w-4 h-4" />}
+            className="rounded-full w-11 h-11 p-0 flex items-center justify-center hover:scale-110 transition-transform"
             onClick={handleAddToCart}
+            title="Add to Cart"
           >
-            Add to Cart
+            <ShoppingCart className="w-5 h-5" />
           </Button>
         </div>
       </div>
@@ -209,7 +229,7 @@ const ProductCard = ({ product, layout = 'grid' }) => {
       <div className="space-y-3">
         <div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-            {product.category}
+            {product.category?.name || product.category}
           </p>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
             {product.name}
@@ -240,7 +260,7 @@ const ProductCard = ({ product, layout = 'grid' }) => {
               ${product.price}
             </span>
           </div>
-          
+
           {product.inStock !== false ? (
             <span className="text-sm text-green-600 dark:text-green-400 font-medium">
               In Stock

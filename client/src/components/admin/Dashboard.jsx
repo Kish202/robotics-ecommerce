@@ -1,10 +1,11 @@
 import React from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Package, 
-  ShoppingCart, 
-  Users, 
+import { useNavigate } from 'react-router-dom';
+import {
+  TrendingUp,
+  TrendingDown,
+  Package,
+  ShoppingCart,
+  Users,
   DollarSign,
   Eye,
   Star
@@ -12,6 +13,8 @@ import {
 import Card from '../common/Card';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   const stats = [
     {
       title: 'Total Revenue',
@@ -119,8 +122,8 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className={`w-16 h-16 ${stat.bgColor} rounded-2xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-                  <Icon className={`w-8 h-8 bg-gradient-to-br ${stat.color} bg-clip-text text-transparent`} 
-                        style={{ filter: 'drop-shadow(0 0 8px currentColor)' }} />
+                  <Icon className={`w-8 h-8 bg-gradient-to-br ${stat.color} bg-clip-text text-transparent`}
+                    style={{ filter: 'drop-shadow(0 0 8px currentColor)' }} />
                 </div>
               </div>
             </Card>
@@ -161,7 +164,7 @@ const Dashboard = () => {
                       {order.customer}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
-                      {order.product}
+                      {typeof order.product === 'object' ? order.product?.name : order.product}
                     </td>
                     <td className="py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">
                       {order.amount}
@@ -225,28 +228,40 @@ const Dashboard = () => {
           Quick Actions
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl hover:shadow-lg transition-all group">
+          <button
+            onClick={() => navigate('/admin/products')}
+            className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl hover:shadow-lg transition-all group"
+          >
             <Package className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
               Add Product
             </p>
           </button>
-          
-          <button className="p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl hover:shadow-lg transition-all group">
+
+          <button
+            onClick={() => alert('Orders feature coming soon!')}
+            className="p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl hover:shadow-lg transition-all group"
+          >
             <Eye className="w-8 h-8 text-green-600 dark:text-green-400 mb-3 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
               View Orders
             </p>
           </button>
-          
-          <button className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl hover:shadow-lg transition-all group">
+
+          <button
+            onClick={() => navigate('/admin/reviews')}
+            className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl hover:shadow-lg transition-all group"
+          >
             <Star className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-3 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
               Manage Reviews
             </p>
           </button>
-          
-          <button className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-xl hover:shadow-lg transition-all group">
+
+          <button
+            onClick={() => alert('Customers feature coming soon!')}
+            className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-xl hover:shadow-lg transition-all group"
+          >
             <Users className="w-8 h-8 text-orange-600 dark:text-orange-400 mb-3 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
               View Customers

@@ -1,148 +1,224 @@
-// API Client
-// This is the main API client that your components should use
-// Switch between mock API and real API by changing the import
-
-// For development with mock data:
-import mockAPI from './mockAPI';
-export const api = mockAPI;
-
-// For production with real backend, uncomment and configure:
-/*
+// Real API Client for RoboTech Backend
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+// API Base URL - change based on environment
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
+
+// Create axios instance
 const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add auth token to requests
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Handle errors globally
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized - redirect to login
-      localStorage.removeItem('authToken');
-      window.location.href = '/admin/login';
+// Request interceptor - Add auth token to requests
+apiClient.interceptors.request.use(
+  (config) => {
+    let token = localStorage.getItem('token');
+    try {
+      const parsed = JSON.parse(token);
+      if (parsed) token = parsed;
+    } catch (e) {
+      // Token is likely a raw string, use as is
     }
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
     return Promise.reject(error);
   }
 );
 
-// Real API implementation
-export const api = {
+// Response interceptor - Handle responses and errors
+apiClient.interceptors.response.use(
+  (response) => {
+    // Return the data directly from our backend format { success, data }
+    return response.data;
+  },
+  (error) => {
+    // Handle 401 Unauthorized
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('admin');
+
+      // Redirect to login if on admin page
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/admin/login';
+      }
+    }
+
+    // Return formatted error
+    const message = error.response?.data?.message || 'An error occurred';
+    return Promise.reject({
+      message,
+      status: error.response?.status,
+      ...error.response?.data
+    });
+  }
+);
+
+// API object with all endpoints
+const api = {
+  // Authentication
+  auth: {
+    login: async (email, password) => {
+      const response = await apiClient.post('/auth/login', { email, password });
+      return response;
+    },
+    register: async (data) => {
+      const response = await apiClient.post('/auth/register', data);
+      return response;
+    },
+    getMe: async () => {
+      const response = await apiClient.get('/auth/me');
+      return response;
+    },
+    updateProfile: async (data) => {
+      const response = await apiClient.put('/auth/profile', data);
+      return response;
+    },
+    changePassword: async (currentPassword, newPassword) => {
+      const response = await apiClient.put('/auth/change-password', {
+        currentPassword,
+        newPassword
+      });
+      return response;
+    },
+  },
+
+  // Products
   products: {
-    getAll: async (filters) => {
+    getAll: async (filters = {}) => {
       const response = await apiClient.get('/products', { params: filters });
-      return response.data;
+      return response;
+    },
+    getFeatured: async () => {
+      const response = await apiClient.get('/products/featured');
+      return response;
     },
     getById: async (id) => {
       const response = await apiClient.get(`/products/${id}`);
-      return response.data;
+      return response;
     },
-    create: async (data) => {
-      const response = await apiClient.post('/products', data);
-      return response.data;
+    create: async (formData) => {
+      const response = await apiClient.post('/products', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response;
     },
-    update: async (id, data) => {
-      const response = await apiClient.put(`/products/${id}`, data);
-      return response.data;
+    update: async (id, formData) => {
+      const response = await apiClient.put(`/products/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response;
     },
     delete: async (id) => {
       const response = await apiClient.delete(`/products/${id}`);
-      return response.data;
+      return response;
     },
   },
-  
+
+  // Categories
   categories: {
-    getAll: async () => {
-      const response = await apiClient.get('/categories');
-      return response.data;
+    getAll: async (filters = {}) => {
+      const response = await apiClient.get('/categories', { params: filters });
+      return response;
     },
     getById: async (id) => {
       const response = await apiClient.get(`/categories/${id}`);
-      return response.data;
+      return response;
     },
-    create: async (data) => {
-      const response = await apiClient.post('/categories', data);
-      return response.data;
+    create: async (formData) => {
+      const response = await apiClient.post('/categories', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response;
     },
-    update: async (id, data) => {
-      const response = await apiClient.put(`/categories/${id}`, data);
-      return response.data;
+    update: async (id, formData) => {
+      const response = await apiClient.put(`/categories/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response;
     },
     delete: async (id) => {
       const response = await apiClient.delete(`/categories/${id}`);
-      return response.data;
+      return response;
     },
   },
-  
+
+  // Reviews
   reviews: {
-    getAll: async (filters) => {
+    getAll: async (filters = {}) => {
       const response = await apiClient.get('/reviews', { params: filters });
-      return response.data;
+      return response;
+    },
+    getByProduct: async (productId, filters = {}) => {
+      const response = await apiClient.get(`/reviews/product/${productId}`, { params: filters });
+      return response;
+    },
+    create: async (data) => {
+      const response = await apiClient.post('/reviews', data);
+      return response;
     },
     approve: async (id) => {
-      const response = await apiClient.post(`/reviews/${id}/approve`);
-      return response.data;
+      const response = await apiClient.put(`/reviews/${id}/approve`);
+      return response;
     },
     reject: async (id) => {
-      const response = await apiClient.post(`/reviews/${id}/reject`);
-      return response.data;
+      const response = await apiClient.put(`/reviews/${id}/reject`);
+      return response;
+    },
+    markHelpful: async (id) => {
+      const response = await apiClient.put(`/reviews/${id}/helpful`);
+      return response;
     },
     delete: async (id) => {
       const response = await apiClient.delete(`/reviews/${id}`);
-      return response.data;
+      return response;
     },
   },
-  
+
+  // Messages/Contact
   messages: {
-    getAll: async (filters) => {
+    getAll: async (filters = {}) => {
       const response = await apiClient.get('/messages', { params: filters });
-      return response.data;
+      return response;
     },
     getById: async (id) => {
       const response = await apiClient.get(`/messages/${id}`);
-      return response.data;
+      return response;
+    },
+    create: async (data) => {
+      const response = await apiClient.post('/messages', data);
+      return response;
     },
     markAsRead: async (id) => {
-      const response = await apiClient.post(`/messages/${id}/read`);
-      return response.data;
+      const response = await apiClient.put(`/messages/${id}/read`);
+      return response;
+    },
+    markAsReplied: async (id, notes) => {
+      const response = await apiClient.put(`/messages/${id}/reply`, { notes });
+      return response;
     },
     archive: async (id) => {
-      const response = await apiClient.post(`/messages/${id}/archive`);
-      return response.data;
+      const response = await apiClient.put(`/messages/${id}/archive`);
+      return response;
+    },
+    updatePriority: async (id, priority) => {
+      const response = await apiClient.put(`/messages/${id}/priority`, { priority });
+      return response;
     },
     delete: async (id) => {
       const response = await apiClient.delete(`/messages/${id}`);
-      return response.data;
-    },
-    send: async (data) => {
-      const response = await apiClient.post('/messages', data);
-      return response.data;
-    },
-  },
-  
-  orders: {
-    getAll: async () => {
-      const response = await apiClient.get('/orders');
-      return response.data;
+      return response;
     },
   },
 };
-*/
 
-// Export for easy imports
 export default api;
+export { apiClient, API_BASE_URL };

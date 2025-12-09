@@ -2,12 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const ProductSearch = ({ onSearch, placeholder = 'Search products...' }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const ProductSearch = ({ onSearch, searchTerm: propSearchTerm, onClear, placeholder = 'Search products...' }) => {
+  const [searchTerm, setSearchTerm] = useState(propSearchTerm || '');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const searchRef = useRef(null);
   const navigate = useNavigate();
+
+  // Sync with prop
+  useEffect(() => {
+    setSearchTerm(propSearchTerm || '');
+  }, [propSearchTerm]);
 
   // Mock popular searches and recent searches
   const popularSearches = [
@@ -74,7 +79,11 @@ const ProductSearch = ({ onSearch, placeholder = 'Search products...' }) => {
 
   const handleClearSearch = () => {
     setSearchTerm('');
-    onSearch('');
+    if (onClear) {
+      onClear();
+    } else {
+      onSearch('');
+    }
   };
 
   return (
@@ -84,7 +93,7 @@ const ProductSearch = ({ onSearch, placeholder = 'Search products...' }) => {
         <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
           <Search className="w-5 h-5" />
         </div>
-        
+
         <input
           type="text"
           value={searchTerm}

@@ -15,15 +15,19 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useLocalStorage('cart', []);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  // Helper to get product ID
+  const getProductId = (product) => product._id || product.id;
+
   // Add item to cart
   const addToCart = (product, quantity = 1) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
+      const productId = getProductId(product);
+      const existingItem = prevItems.find((item) => getProductId(item) === productId);
 
       if (existingItem) {
         // Update quantity if item already exists
         return prevItems.map((item) =>
-          item.id === product.id
+          getProductId(item) === productId
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -36,7 +40,7 @@ export const CartProvider = ({ children }) => {
 
   // Remove item from cart
   const removeFromCart = (productId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+    setCartItems((prevItems) => prevItems.filter((item) => getProductId(item) !== productId));
   };
 
   // Update item quantity
@@ -48,7 +52,7 @@ export const CartProvider = ({ children }) => {
 
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
+        getProductId(item) === productId ? { ...item, quantity } : item
       )
     );
   };
@@ -69,7 +73,7 @@ export const CartProvider = ({ children }) => {
 
   // Check if item is in cart
   const isInCart = (productId) => {
-    return cartItems.some((item) => item.id === productId);
+    return cartItems.some((item) => getProductId(item) === productId);
   };
 
   // Toggle cart sidebar
@@ -99,11 +103,11 @@ export const CartProvider = ({ children }) => {
  */
 export const useCart = () => {
   const context = useContext(CartContext);
-  
+
   if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider');
   }
-  
+
   return context;
 };
 export default CartContext;

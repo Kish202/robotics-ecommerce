@@ -1,18 +1,20 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
-import Home from '../pages/Home';
+import ProtectedRoute from '../components/ProtectedRoutes';
+import
+Home from '../pages/Home';
 import Products from '../pages/Products';
 import ProductDetail from '../pages/ProductDetail';
 import About from '../pages/About';
-import  Contact from '../pages/Contact';
-import AdminDashboard from '../pages/adminDashboard';
-import  AdminProducts from '../pages/adminProducts';
-import  AdminCategories from '../pages/adminCategories';
-import AdminReviews from '../pages/adminReviews';
-import  AdminMessages from '../pages/adminMessages';
-
-
+import Contact from '../pages/Contact';
+import Cart from '../pages/Cart';
+import AdminLogin from '../pages/adminPage';
+import AdminDashboard from '../pages/AdminDashboard';
+import AdminProducts from '../pages/AdminProducts';
+import AdminCategories from '../pages/AdminCategories';
+import AdminReviews from '../pages/AdminReviews';
+import AdminMessages from '../pages/AdminMessages';
 
 const AppRoutes = () => {
   return (
@@ -24,14 +26,53 @@ const AppRoutes = () => {
         <Route path="products/:id" element={<ProductDetail />} />
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="cart" element={<Cart />} />
       </Route>
 
-      {/* Admin Routes (without main layout, uses AdminLayout internally) */}
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/products" element={<AdminProducts />} />
-      <Route path="/admin/categories" element={<AdminCategories />} />
-      <Route path="/admin/reviews" element={<AdminReviews />} />
-      <Route path="/admin/messages" element={<AdminMessages />} />
+      {/* Admin Login Route (Public) */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+
+      {/* Protected Admin Routes */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/products"
+        element={
+          <ProtectedRoute>
+            <AdminProducts />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/categories"
+        element={
+          <ProtectedRoute>
+            <AdminCategories />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reviews"
+        element={
+          <ProtectedRoute>
+            <AdminReviews />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/messages"
+        element={
+          <ProtectedRoute>
+            <AdminMessages />
+          </ProtectedRoute>
+        }
+      />
 
       {/* 404 Not Found Route */}
       <Route path="*" element={<NotFound />} />

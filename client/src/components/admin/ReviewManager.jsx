@@ -1,84 +1,83 @@
-import React, { useState } from 'react';
-import { Star, Check, X, Eye, Trash2, Filter } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Star, Check, X, Trash2 } from 'lucide-react';
 import Card from '../common/Card';
 import Badge from '../common/Badge';
 import Button from '../common/Button';
 import Rating from '../common/Rating';
-import Pagination from '../common/Pagination';
+import Spinner from '../common/Spinner';
+import api from '../../services/api';
 
 const ReviewManager = () => {
-  const [reviews, setReviews] = useState([
-    {
-      id: 1,
-      productName: 'RoboClean Pro X1',
-      productId: 1,
-      author: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      rating: 5,
-      title: 'Absolutely Amazing!',
-      content: 'This robot has completely transformed my daily cleaning routine. The AI navigation is incredibly smart...',
-      date: '2024-01-15',
-      status: 'pending',
-      helpful: 0,
-    },
-    {
-      id: 2,
-      productName: 'ChefBot Deluxe',
-      productId: 2,
-      author: 'Michael Chen',
-      email: 'michael.c@email.com',
-      rating: 4,
-      title: 'Great value for money',
-      content: 'Very impressed with the build quality and performance. Setup was easy and the robot is quite efficient...',
-      date: '2024-01-14',
-      status: 'approved',
-      helpful: 12,
-    },
-    {
-      id: 3,
-      productName: 'LawnMaster AI',
-      productId: 3,
-      author: 'Emily Rodriguez',
-      email: 'emily.r@email.com',
-      rating: 5,
-      title: 'Perfect for pet owners!',
-      content: 'I have two dogs and this robot handles pet hair like a champ! The suction power is impressive...',
-      date: '2024-01-13',
-      status: 'approved',
-      helpful: 28,
-    },
-    {
-      id: 4,
-      productName: 'RoboClean Pro X1',
-      productId: 1,
-      author: 'John Doe',
-      email: 'john.d@email.com',
-      rating: 2,
-      title: 'Disappointed',
-      content: 'Product stopped working after one week. Customer service has been unhelpful...',
-      date: '2024-01-12',
-      status: 'pending',
-      helpful: 3,
-    },
-    {
-      id: 5,
-      productName: 'ServeBot Elite',
-      productId: 4,
-      author: 'Lisa Park',
-      email: 'lisa.p@email.com',
-      rating: 5,
-      title: 'Best investment!',
-      content: 'Cannot recommend this enough! It saves me hours every week. The mapping feature is genius...',
-      date: '2024-01-11',
-      status: 'approved',
-      helpful: 45,
-    },
-  ]);
-
+  const [reviews, setReviews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterRating, setFilterRating] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.reviews.getAll();
+      if (response.success) {
+        setReviews(response.data);
+      }
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+      setError(err.message || 'Failed to load reviews');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleApprove = async (reviewId) => {
+    try {
+      const response = await api.reviews.approve(reviewId);
+      if (response.success) {
+        setReviews(
+          reviews.map((review) =>
+            review._id === reviewId ? response.data : review
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Error approving review:', err);
+      alert(err.message || 'Failed to approve review');
+    }
+  };
+
+  const handleReject = async (reviewId) => {
+    try {
+      const response = await api.reviews.reject(reviewId);
+      if (response.success) {
+        setReviews(
+          reviews.map((review) =>
+            review._id === reviewId ? response.data : review
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Error rejecting review:', err);
+      alert(err.message || 'Failed to reject review');
+    }
+  };
+
+  const handleDelete = async (reviewId) => {
+    if (window.confirm('Are you sure you want to delete this review?')) {
+      try {
+        const response = await api.reviews.delete(reviewId);
+        if (response.success) {
+          setReviews(reviews.filter((review) => review._id !== reviewId));
+        }
+      } catch (err) {
+        console.error('Error deleting review:', err);
+        alert(err.message || 'Failed to delete review');
+      }
+    }
+  };
 
   // Filter reviews
   const filteredReviews = reviews.filter((review) => {
@@ -86,33 +85,6 @@ const ReviewManager = () => {
     const matchesRating = filterRating === 'all' || review.rating.toString() === filterRating;
     return matchesStatus && matchesRating;
   });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredReviews.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedReviews = filteredReviews.slice(startIndex, startIndex + itemsPerPage);
-
-  const handleApprove = (reviewId) => {
-    setReviews(
-      reviews.map((review) =>
-        review.id === reviewId ? { ...review, status: 'approved' } : review
-      )
-    );
-  };
-
-  const handleReject = (reviewId) => {
-    setReviews(
-      reviews.map((review) =>
-        review.id === reviewId ? { ...review, status: 'rejected' } : review
-      )
-    );
-  };
-
-  const handleDelete = (reviewId) => {
-    if (window.confirm('Are you sure you want to delete this review?')) {
-      setReviews(reviews.filter((review) => review.id !== reviewId));
-    }
-  };
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -132,10 +104,31 @@ const ReviewManager = () => {
     approved: reviews.filter((r) => r.status === 'approved').length,
     pending: reviews.filter((r) => r.status === 'pending').length,
     rejected: reviews.filter((r) => r.status === 'rejected').length,
-    avgRating: (
-      reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    ).toFixed(1),
+    avgRating: reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      : '0.0',
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <div className="text-center py-12">
+          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+          <Button variant="outline" onClick={fetchReviews}>
+            Try Again
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -218,10 +211,10 @@ const ReviewManager = () => {
       {/* Reviews List */}
       <Card>
         <div className="space-y-6">
-          {paginatedReviews.length > 0 ? (
-            paginatedReviews.map((review) => (
+          {filteredReviews.length > 0 ? (
+            filteredReviews.map((review) => (
               <div
-                key={review.id}
+                key={review._id}
                 className="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl"
               >
                 {/* Review Header */}
@@ -229,7 +222,7 @@ const ReviewManager = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h4 className="font-semibold text-gray-900 dark:text-white">
-                        {review.author}
+                        {review.customerName}
                       </h4>
                       {getStatusBadge(review.status)}
                     </div>
@@ -237,13 +230,13 @@ const ReviewManager = () => {
                       {review.email}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Product: <span className="font-medium">{review.productName}</span>
+                      Product ID: <span className="font-medium">{review.product}</span>
                     </p>
                   </div>
                   <div className="text-right">
                     <Rating rating={review.rating} size="sm" />
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      {review.date}
+                      {new Date(review.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -253,53 +246,33 @@ const ReviewManager = () => {
                   {review.title}
                 </h5>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  {review.content}
+                  {review.comment}
                 </p>
 
                 {/* Review Meta */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    {review.helpful} people found this helpful
+                    {review.helpful || 0} people found this helpful
                   </div>
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    {review.status === 'pending' && (
-                      <>
-                        <Button
-                          variant="success"
-                          size="sm"
-                          icon={<Check className="w-4 h-4" />}
-                          onClick={() => handleApprove(review.id)}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          icon={<X className="w-4 h-4" />}
-                          onClick={() => handleReject(review.id)}
-                        >
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                    {review.status === 'rejected' && (
+                    {review.status !== 'approved' && (
                       <Button
                         variant="success"
                         size="sm"
                         icon={<Check className="w-4 h-4" />}
-                        onClick={() => handleApprove(review.id)}
+                        onClick={() => handleApprove(review._id)}
                       >
                         Approve
                       </Button>
                     )}
-                    {review.status === 'approved' && (
+                    {review.status !== 'rejected' && (
                       <Button
                         variant="danger"
                         size="sm"
                         icon={<X className="w-4 h-4" />}
-                        onClick={() => handleReject(review.id)}
+                        onClick={() => handleReject(review._id)}
                       >
                         Reject
                       </Button>
@@ -308,7 +281,7 @@ const ReviewManager = () => {
                       variant="outline"
                       size="sm"
                       icon={<Trash2 className="w-4 h-4" />}
-                      onClick={() => handleDelete(review.id)}
+                      onClick={() => handleDelete(review._id)}
                     >
                       Delete
                     </Button>
@@ -328,22 +301,9 @@ const ReviewManager = () => {
             </div>
           )}
         </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-6 flex justify-center">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
       </Card>
     </div>
   );
 };
-
-
 
 export default ReviewManager;

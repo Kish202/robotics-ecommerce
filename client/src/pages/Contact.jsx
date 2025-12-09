@@ -4,6 +4,8 @@ import Card from '../components/common/Card';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import Breadcrumb from '../components/common/Breadcrumb';
+import api from '../services/api';
+
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -91,20 +93,32 @@ const Contact = () => {
     if (validateForm()) {
       setIsSubmitting(true);
 
-      // Simulate API call
-      setTimeout(() => {
-        console.log('Form submitted:', formData);
-        setIsSubmitting(false);
-        setIsSubmitted(true);
-        setFormData({ name: '', email: '', subject: '', message: '' });
+      try {
+        const response = await api.messages.create({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message
+        });
 
-        // Reset success message after 5 seconds
-        setTimeout(() => {
-          setIsSubmitted(false);
-        }, 5000);
-      }, 1000);
+        if (response.success) {
+          setIsSubmitted(true);
+          setFormData({ name: '', email: '', subject: '', message: '' });
+
+          // Reset success message after 5 seconds
+          setTimeout(() => {
+            setIsSubmitted(false);
+          }, 5000);
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        setErrors({ submit: error.message || 'Failed to send message. Please try again.' });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
@@ -231,10 +245,9 @@ const Contact = () => {
                   required
                   className={`
                     w-full px-4 py-3 rounded-lg border
-                    ${
-                      errors.message
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    ${errors.message
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                     }
                     focus:outline-none focus:ring-2 focus:ring-opacity-50
                     bg-white dark:bg-gray-800 dark:border-gray-700

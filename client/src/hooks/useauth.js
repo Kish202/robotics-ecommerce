@@ -1,48 +1,48 @@
 import { useState, useEffect } from 'react';
 import { useLocalStorage } from './uselocalstorage';
+import api from '../services/api';
 
 /**
  * Custom hook for managing authentication
- * Currently uses mock authentication - replace with real auth when backend is ready
+ * Connected to RoboTech backend API
  */
 export const useAuth = () => {
-  const [user, setUser] = useLocalStorage('user', null);
-  const [token, setToken] = useLocalStorage('authToken', null);
+  const [user, setUser] = useLocalStorage('admin', null);
+  const [token, setToken] = useLocalStorage('token', null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Check if user is authenticated
   const isAuthenticated = !!token && !!user;
 
   // Check if user is admin
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
-  // Login function (mock)
-  const login = async (credentials) => {
+  // Check if user is superadmin
+  const isSuperAdmin = user?.role === 'superadmin';
+
+  // Login function - calls real backend
+  const login = async (email, password) => {
     setLoading(true);
-    
+    setError(null);
+
     try {
-      // Mock login - replace with actual API call
-      // const response = await api.auth.login(credentials);
-      
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await api.auth.login(email, password);
 
-      // Mock successful login
-      const mockUser = {
-        id: 1,
-        name: 'Admin User',
-        email: credentials.email,
-        role: 'admin',
-      };
+      if (response.success) {
+        setUser(response.admin);
+        setToken(response.token);
 
-      const mockToken = 'mock-jwt-token-' + Date.now();
+        // LocalStorage handled by hook
 
-      setUser(mockUser);
-      setToken(mockToken);
-
-      return { success: true, user: mockUser };
+        return { success: true, user: response.admin };
+      } else {
+        throw new Error(response.message || 'Login failed');
+      }
     } catch (error) {
-      return { success: false, error: error.message };
+      const errorMessage = error.message || 'Login failed. Please try again.';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -52,32 +52,33 @@ export const useAuth = () => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('authToken');
+    setError(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('admin');
   };
 
-  // Register function (mock)
+  // Register function - calls real backend
   const register = async (userData) => {
     setLoading(true);
+    setError(null);
 
     try {
-      // Mock register - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await api.auth.register(userData);
 
-      const mockUser = {
-        id: Date.now(),
-        ...userData,
-        role: 'user',
-      };
+      if (response.success) {
+        setUser(response.admin);
+        setToken(response.token);
 
-      const mockToken = 'mock-jwt-token-' + Date.now();
+        // LocalStorage handled by hook
 
-      setUser(mockUser);
-      setToken(mockToken);
-
-      return { success: true, user: mockUser };
+        return { success: true, user: response.admin };
+      } else {
+        throw new Error(response.message || 'Registration failed');
+      }
     } catch (error) {
-      return { success: false, error: error.message };
+      const errorMessage = error.message || 'Registration failed. Please try again.';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -86,32 +87,141 @@ export const useAuth = () => {
   // Update user profile
   const updateProfile = async (updates) => {
     setLoading(true);
+    setError(null);
 
     try {
-      // Mock update - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await api.auth.updateProfile(updates);
 
-      const updatedUser = { ...user, ...updates };
-      setUser(updatedUser);
+      if (response.success) {
+        setUser(response.data);
+        // LocalStorage handled by hook
 
-      return { success: true, user: updatedUser };
+        return { success: true, user: response.data };
+      } else {
+        throw new Error(response.message || 'Update failed');
+      }
     } catch (error) {
-      return { success: false, error: error.message };
+      const errorMessage = error.message || 'Update failed. Please try again.';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
   };
+
+  // Change password
+  const changePassword = async (currentPassword, newPassword) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await api.auth.changePassword(currentPassword, newPassword);
+
+      if (response.success) {
+        // Update token if backend returns new one
+        if (response.token) {
+          setToken(response.token);
+          // LocalStorage handled by hook
+        }
+
+        return { success: true, message: response.message };
+      } else {
+        throw new Error(response.message || 'Password change failed');
+      }
+    } catch (error) {
+      const errorMessage = error.message || 'Password change failed. Please try again.';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get current user from backend (verify token)
+  const refreshUser = async () => {
+    if (!token) return;
+
+    setLoading(true);
+
+    try {
+      const response = await api.auth.getMe();
+
+      if (response.success) {
+        setUser(response.data);
+        // LocalStorage handled by hook
+      }
+    } catch (error) {
+      // Token invalid or expired
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify token on mount and restore session
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const storedToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('admin');
+
+        if (storedToken && storedUser) {
+          // Parse values (handle potential JSON strings from useLocalStorage)
+          let parsedToken = storedToken;
+          let parsedUser = null;
+
+          try {
+            parsedToken = JSON.parse(storedToken);
+            parsedUser = JSON.parse(storedUser);
+          } catch (e) {
+            // If parsing fails, use as is (legacy/raw string)
+            console.warn('Error parsing stored auth data:', e);
+          }
+
+          if (parsedToken && parsedUser) {
+            setUser(parsedUser);
+            setToken(parsedToken);
+
+            // Verify token validity
+            try {
+              const response = await api.auth.getMe();
+              if (response.success) {
+                setUser(response.data);
+              } else {
+                logout();
+              }
+            } catch (error) {
+              console.error('Token verification failed:', error);
+              logout();
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
 
   return {
     user,
     token,
     isAuthenticated,
     isAdmin,
+    isSuperAdmin,
     loading,
+    error,
     login,
     logout,
     register,
     updateProfile,
+    changePassword,
+    refreshUser,
   };
 };
 

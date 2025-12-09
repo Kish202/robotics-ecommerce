@@ -26,19 +26,19 @@ const ProductComparison = ({ products, isOpen, onClose, onRemoveProduct }) => {
     switch (feature.key) {
       case 'price':
         return <span className="text-xl font-bold">${product.price}</span>;
-      
+
       case 'rating':
         return <Rating rating={product.rating || 0} size="sm" showNumber />;
-      
+
       case 'category':
-        return <Badge variant="primary">{product.category}</Badge>;
-      
+        return <Badge variant="primary">{typeof product.category === 'object' ? product.category?.name : product.category}</Badge>;
+
       case 'batteryLife':
         return product.batteryLife || 'N/A';
-      
+
       case 'warranty':
         return product.warranty || '1 Year';
-      
+
       default:
         // Boolean features
         if (product[feature.key] === true) {
@@ -92,7 +92,7 @@ const ProductComparison = ({ products, isOpen, onClose, onRemoveProduct }) => {
                       {product.name}
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                      {product.category}
+                      {typeof product.category === 'object' ? product.category?.name : product.category}
                     </p>
                   </div>
                 </th>

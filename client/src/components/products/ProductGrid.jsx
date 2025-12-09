@@ -2,11 +2,14 @@ import React from 'react';
 import ProductCard from './ProductCard';
 import Spinner from '../common/Spinner';
 
-const ProductGrid = ({ 
-  products, 
-  layout = 'grid', 
+const ProductGrid = ({
+  products,
+  layout = 'grid',
   isLoading = false,
-  emptyMessage = 'No products found'
+  emptyMessage = 'No products found',
+  onAddToComparison,
+  compareProducts,
+  onQuickView
 }) => {
   if (isLoading) {
     return (
@@ -39,7 +42,12 @@ const ProductGrid = ({
       }
     >
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} layout={layout} />
+        <ProductCard
+          key={product._id || product.id}
+          product={product}
+          layout={layout}
+          onQuickView={onQuickView}
+        />
       ))}
     </div>
   );

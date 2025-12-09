@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  ShoppingCart, 
-  Heart, 
-  Share2, 
-  Truck, 
-  Shield, 
+import {
+  ShoppingCart,
+  Heart,
+  Share2,
+  Truck,
+  Shield,
   RotateCcw,
   Star,
   Minus,
@@ -14,9 +14,14 @@ import Button from '../common/Button';
 import Badge from '../common/Badge';
 import Rating from '../common/Rating';
 
+import { useCart } from '../../contexts/ShoppingContext';
+import { useNavigate } from 'react-router-dom';
+
 const ProductInfo = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const handleQuantityChange = (action) => {
     if (action === 'increment') {
@@ -27,11 +32,13 @@ const ProductInfo = ({ product }) => {
   };
 
   const handleAddToCart = () => {
-    console.log('Added to cart:', { product: product.id, quantity });
+    addToCart(product, quantity);
+    // Optional: Show toast
   };
 
   const handleBuyNow = () => {
-    console.log('Buy now:', { product: product.id, quantity });
+    addToCart(product, quantity);
+    navigate('/cart'); // Assuming there is a cart page
   };
 
   const handleShare = () => {
@@ -58,7 +65,7 @@ const ProductInfo = ({ product }) => {
     <div className="space-y-6">
       {/* Category & Badges */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Badge variant="primary">{product.category || 'Robot'}</Badge>
+        <Badge variant="primary">{typeof product.category === 'object' ? product.category?.name : product.category || 'Robot'}</Badge>
         {product.badge && (
           <Badge variant={product.badgeVariant || 'success'}>{product.badge}</Badge>
         )}
@@ -116,7 +123,7 @@ const ProductInfo = ({ product }) => {
           About this product
         </h3>
         <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-          {product.description || 
+          {product.description ||
             'Experience cutting-edge robotic technology designed to revolutionize your daily routine. This advanced robot combines artificial intelligence with practical functionality to deliver outstanding performance.'}
         </p>
       </div>
@@ -179,7 +186,7 @@ const ProductInfo = ({ product }) => {
         >
           Add to Cart
         </Button>
-        
+
         <Button
           variant="secondary"
           size="lg"
@@ -199,7 +206,7 @@ const ProductInfo = ({ product }) => {
           >
             {isFavorite ? 'Saved' : 'Save'}
           </Button>
-          
+
           <Button
             variant="outline"
             size="md"
