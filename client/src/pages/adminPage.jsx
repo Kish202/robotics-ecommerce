@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../contexts/AuthContext';
+import { useAuthContext } from '../contexts/Authcontext';
 import { LogIn, AlertCircle, Loader } from 'lucide-react';
 
 const AdminLogin = () => {
