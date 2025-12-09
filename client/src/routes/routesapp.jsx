@@ -10,11 +10,11 @@ import About from '../pages/About';
 import Contact from '../pages/Contact';
 import Cart from '../pages/Cart';
 import AdminLogin from '../pages/adminPage';
-import AdminDashboard from '../pages/AdminDashboard';
-import AdminProducts from '../pages/AdminProducts';
-import AdminCategories from '../pages/AdminCategories';
-import AdminReviews from '../pages/AdminReviews';
-import AdminMessages from '../pages/AdminMessages';
+import AdminDashboard from '../pages/adminDashboard';
+import AdminProducts from '../pages/adminProducts';
+import AdminCategories from '../pages/adminCategories';
+import AdminReviews from '../pages/adminReviews';
+import AdminMessages from '../pages/adminMessages';
 
 const AppRoutes = () => {
   return (
