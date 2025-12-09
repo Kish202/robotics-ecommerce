@@ -6,8 +6,10 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { CartProvider } from './contexts/ShoppingContext';
 import './styles/index.css';
 
+
 function App() {
   return (
+
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
