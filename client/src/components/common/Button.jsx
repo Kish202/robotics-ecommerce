@@ -1,10 +1,10 @@
 import React from 'react';
 
-const Button = ({ 
-  children, 
-  variant = 'primary', 
-  size = 'md', 
-  onClick, 
+const Button = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  onClick,
   type = 'button',
   disabled = false,
   className = '',
@@ -12,8 +12,8 @@ const Button = ({
   fullWidth = false,
   loading = false
 }) => {
-  const baseStyles = 'font-semibold rounded-lg transition-all duration-300 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed';
-  
+  const baseStyles = 'font-semibold transition-all duration-300 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed';
+
   const variants = {
     primary: 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105',
     secondary: 'bg-gray-800 text-white hover:bg-gray-900 border border-gray-700',
@@ -22,13 +22,13 @@ const Button = ({
     danger: 'bg-red-600 text-white hover:bg-red-700 shadow-lg',
     success: 'bg-green-600 text-white hover:bg-green-700 shadow-lg',
   };
-  
+
   const sizes = {
     sm: 'px-4 py-2 text-sm',
     md: 'px-6 py-3 text-base',
     lg: 'px-8 py-4 text-lg',
   };
-  
+
   return (
     <button
       type={type}

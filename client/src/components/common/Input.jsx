@@ -22,14 +22,14 @@ const Input = ({
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
-      
+
       <div className="relative">
         {icon && (
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             {icon}
           </div>
         )}
-        
+
         <input
           type={type}
           id={name}
@@ -39,10 +39,10 @@ const Input = ({
           placeholder={placeholder}
           disabled={disabled}
           className={`
-            w-full px-4 py-3 rounded-lg border
+            w-full px-4 py-3 border
             ${icon ? 'pl-10' : ''}
-            ${error 
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+            ${error
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
               : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
             }
             focus:outline-none focus:ring-2 focus:ring-opacity-50
@@ -53,7 +53,7 @@ const Input = ({
           {...props}
         />
       </div>
-      
+
       {error && (
         <p className="mt-1 text-sm text-red-500">{error}</p>
       )}

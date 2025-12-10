@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-const Modal = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
   size = 'md',
-  showCloseButton = true 
+  showCloseButton = true
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -15,7 +15,7 @@ const Modal = ({
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -25,11 +25,11 @@ const Modal = ({
     const handleEscape = (e) => {
       if (e.key === 'Escape') onClose();
     };
-    
+
     if (isOpen) {
       window.addEventListener('keydown', handleEscape);
     }
-    
+
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
@@ -46,15 +46,15 @@ const Modal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
-      <div 
+      <div
         className={`
-          relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl 
+          relative bg-white dark:bg-gray-900 shadow-2xl 
           ${sizes[size]} w-full max-h-[90vh] overflow-hidden
           animate-in fade-in zoom-in duration-200
         `}
@@ -70,14 +70,14 @@ const Modal = ({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             )}
           </div>
         )}
-        
+
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           {children}

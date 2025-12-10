@@ -65,8 +65,8 @@ const Navbar = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2">
                   <Bot className="w-8 h-8 text-white" />
                 </div>
               </div>
@@ -105,7 +105,7 @@ const Navbar = () => {
                 title="Shopping Cart"
               >
                 <ShoppingCart className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center">
                   {cartItems.length}
                 </span>
               </button>
@@ -146,7 +146,7 @@ const Navbar = () => {
                 key={link.name}
                 to={link.path}
                 onClick={toggleMenu}
-                className="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors"
+                className="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
               >
                 {link.name}
               </Link>
@@ -158,7 +158,7 @@ const Navbar = () => {
                   setIsSearchOpen(true);
                   toggleMenu();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <Search className="w-5 h-5" />
                 <span>Search</span>
@@ -169,7 +169,7 @@ const Navbar = () => {
                   handleCartClick();
                   toggleMenu();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <ShoppingCart className="w-5 h-5" />
                 <span>Cart ({cartItems.length})</span>
@@ -180,7 +180,7 @@ const Navbar = () => {
                   navigate('/admin');
                   toggleMenu();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <User className="w-5 h-5" />
                 <span>Admin</span>
@@ -201,11 +201,11 @@ const Navbar = () => {
           onClick={() => setIsSearchOpen(false)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-slideDown"
+            className="bg-white dark:bg-gray-800 shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-slideDown"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Gradient Header Accent */}
-            <div className="h-1.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-t-3xl"></div>
+            <div className="h-1.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"></div>
 
             <form onSubmit={handleSearch} className="p-8">
               {/* Search Title */}
@@ -220,8 +220,8 @@ const Navbar = () => {
 
               {/* Search Input Container */}
               <div className="relative mb-6">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl blur-xl"></div>
-                <div className="relative flex items-center gap-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl px-6 py-4 border-2 border-gray-200 dark:border-gray-700 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 blur-xl"></div>
+                <div className="relative flex items-center gap-4 bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-2 border-gray-200 dark:border-gray-700 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-all duration-300">
                   <Search className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   <input
                     type="text"
@@ -234,7 +234,7 @@ const Navbar = () => {
                   <button
                     type="button"
                     onClick={() => setIsSearchOpen(false)}
-                    className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 hover:scale-110"
+                    className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-110"
                     title="Close"
                   >
                     <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -271,7 +271,7 @@ const Navbar = () => {
                         setSearchQuery(term);
                         handleSearch({ preventDefault: () => { } });
                       }}
-                      className="px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/40 dark:hover:to-purple-900/40 transition-all duration-200 hover:scale-105 border border-blue-200 dark:border-blue-800"
+                      className="px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-700 dark:text-blue-300 text-sm font-medium hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/40 dark:hover:to-purple-900/40 transition-all duration-200 hover:scale-105 border border-blue-200 dark:border-blue-800"
                     >
                       {term}
                     </button>

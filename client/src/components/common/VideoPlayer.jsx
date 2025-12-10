@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
 
-const VideoPlayer = ({ 
-  src, 
-  poster, 
-  autoPlay = false, 
+const VideoPlayer = ({
+  src,
+  poster,
+  autoPlay = false,
   loop = false,
-  className = '' 
+  className = ''
 }) => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
@@ -63,18 +63,18 @@ const VideoPlayer = ({
         loop={loop}
         autoPlay={autoPlay}
         onTimeUpdate={handleTimeUpdate}
-        className="w-full rounded-lg"
+        className="w-full"
       />
 
       {/* Controls Overlay */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
         {/* Progress Bar */}
         <div
-          className="w-full h-1 bg-gray-600 rounded-full cursor-pointer mb-3"
+          className="w-full h-1 bg-gray-600 cursor-pointer mb-3"
           onClick={handleProgressClick}
         >
           <div
-            className="h-full bg-blue-600 rounded-full transition-all"
+            className="h-full bg-blue-600 transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>

@@ -1,28 +1,18 @@
 import React from 'react';
 import Hero from '../components/home/Hero';
-import Features from '../components/home/Features';
-import  FeaturedProducts from '../components/home/FeaturedProducts';
-import  Testimonials
-from '../components/home/Testimonials';
-import  Newsletter from '../components/home/Newsletter';   
+import FeaturedProducts from '../components/home/FeaturedProducts';
+import Industries from '../components/home/Industries';
+import Testimonials from '../components/home/Testimonials';
 
 const Home = () => {
   return (
-    <div>
-      {/* Hero Section */}
+    <div className="flex flex-col min-h-screen">
       <Hero />
-
-      {/* Features Section */}
-      <Features />
-
-      {/* Featured Products */}
       <FeaturedProducts />
-
-      {/* Testimonials */}
+      <Industries />
       <Testimonials />
-
       {/* Newsletter Subscription */}
-      <Newsletter />
+
     </div>
   );
 };

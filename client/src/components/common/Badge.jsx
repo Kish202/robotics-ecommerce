@@ -1,10 +1,10 @@
 import React from 'react';
 
-const Badge = ({ 
-  children, 
-  variant = 'default', 
+const Badge = ({
+  children,
+  variant = 'default',
   size = 'md',
-  className = '' 
+  className = ''
 }) => {
   const variants = {
     default: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
@@ -25,7 +25,7 @@ const Badge = ({
   return (
     <span
       className={`
-        inline-flex items-center font-medium rounded-full
+        inline-flex items-center font-medium
         ${variants[variant]}
         ${sizes[size]}
         ${className}

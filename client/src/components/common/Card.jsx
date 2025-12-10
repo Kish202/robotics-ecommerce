@@ -1,12 +1,12 @@
 import React from 'react';
 
-const Card = ({ 
-  children, 
-  className = '', 
+const Card = ({
+  children,
+  className = '',
   hover = false,
   padding = 'md',
   onClick,
-  shadow = true 
+  shadow = true
 }) => {
   const paddings = {
     none: '',
@@ -19,9 +19,9 @@ const Card = ({
     <div
       onClick={onClick}
       className={`
-        bg-white dark:bg-gray-900 rounded-xl
-        ${shadow ? 'shadow-lg' : ''}
-        ${hover ? 'hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer' : ''}
+        bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800
+        ${shadow ? 'shadow-sm' : ''}
+        ${hover ? 'hover:shadow-md transition-all duration-300 cursor-pointer' : ''}
         ${paddings[padding]}
         ${onClick ? 'cursor-pointer' : ''}
         ${className}

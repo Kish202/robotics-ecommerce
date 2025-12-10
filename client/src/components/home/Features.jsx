@@ -1,15 +1,16 @@
 import React from 'react';
-import { 
-  Zap, 
-  Shield, 
-  Smartphone, 
-  Wifi, 
-  Battery, 
+import {
+  Zap,
+  Shield,
+  Smartphone,
+  Wifi,
+  Battery,
   Settings,
   Clock,
   Leaf
 } from 'lucide-react';
 import Card from '../common/Card';
+import Button from '../common/Button';
 
 const Features = () => {
   const features = [
@@ -78,7 +79,7 @@ const Features = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Why Choose Our
-            <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="block text-gray-500 dark:text-gray-400">
               Robotic Solutions
             </span>
           </h2>
@@ -95,18 +96,16 @@ const Features = () => {
               <Card
                 key={index}
                 hover={true}
-                className="group"
+                className="group border border-gray-100 dark:border-gray-800"
               >
                 {/* Icon Container */}
                 <div className="mb-6">
                   <div className={`
-                    w-16 h-16 ${feature.bgColor} rounded-2xl 
+                    w-16 h-16 bg-gray-100 dark:bg-gray-800 
                     flex items-center justify-center 
-                    transform group-hover:scale-110 group-hover:rotate-6 
                     transition-all duration-300
                   `}>
-                    <Icon className={`w-8 h-8 bg-gradient-to-br ${feature.color} bg-clip-text text-transparent`} 
-                          style={{ filter: 'drop-shadow(0 0 8px currentColor)' }} />
+                    <Icon className="w-8 h-8 text-gray-900 dark:text-white" />
                   </div>
                 </div>
 
@@ -117,9 +116,6 @@ const Features = () => {
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                   {feature.description}
                 </p>
-
-                {/* Hover Effect Line */}
-                <div className="mt-6 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
               </Card>
             );
           })}
@@ -130,9 +126,10 @@ const Features = () => {
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
             Ready to experience the future of home automation?
           </p>
-          <div className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-semibold hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer">
-            <span>Discover All Features</span>
-            <Zap className="w-5 h-5 animate-pulse" />
+          <div className="inline-flex">
+            <Button variant="primary" size="lg" icon={<Zap className="w-5 h-5" />}>
+              Discover All Features
+            </Button>
           </div>
         </div>
       </div>
